@@ -14,13 +14,17 @@ connection.connect(function(err){
   console.log('connected as id ' + connection.threadId);
 })
 
+function checkQuantity(product, quantity){
+  connection.query('SELECT ')
+}
+
 function promptUser(){
   prompt.start();
 
   prompt.get([{
       name: 'productId',
       description: 'Enter the Product Id you would like to purchase: ',
-      pattern: /^[1-10]$/,
+      pattern: /^[1-9,10]$/,
       message: 'Select a Product Id 1-10',
       required: true
     }, {
@@ -34,10 +38,13 @@ function promptUser(){
     console.log('Command-line input received:');
     console.log('  Product Id: ' + result.productId);
     console.log('  Quantity: ' + result.quantity);
+
+    checkQuantity(result.productId, result.quantity);
   });
 }
+
 function displayItems(){
-  connection.query('Select * FROM products', function(err, res){
+  connection.query('SELECT * FROM products', function(err, res){
     // if(err) throw err;
     // console.log('Item ID        Product        Department      Price   Quantity');
     // for (i=0;i<res.length;i++){
