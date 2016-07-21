@@ -14,6 +14,24 @@ connection.connect(function(err){
   console.log('connected as id ' + connection.threadId);
 })
 
+function promptUser(){
+  prompt.start();
+
+  prompt.get([{
+      name: 'productId',
+      description: 'Enter the Product Id you would like to purchase: ',
+      required: true
+    }, {
+      name: 'quantity',
+      description: 'Enter the quantity: ',
+      required: true
+    }], function (err, result) {
+    
+    console.log('Command-line input received:');
+    console.log('  Product Id: ' + result.productId);
+    console.log('  Quantity: ' + result.quantity);
+  });
+}
 function displayItems(){
   connection.query('Select * FROM products', function(err, res){
     // if(err) throw err;
@@ -33,8 +51,8 @@ function displayItems(){
       t.newRow()
     })
 
-
     console.log(t.toString());
+    promptUser();
   })
 }
 
