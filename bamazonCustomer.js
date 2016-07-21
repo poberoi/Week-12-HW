@@ -20,10 +20,14 @@ function promptUser(){
   prompt.get([{
       name: 'productId',
       description: 'Enter the Product Id you would like to purchase: ',
+      pattern: /^[1-10]$/,
+      message: 'Select a Product Id 1-10',
       required: true
     }, {
       name: 'quantity',
       description: 'Enter the quantity: ',
+      pattern: /^[1-100]$/,
+      message: 'Select a Product Id 1-100',
       required: true
     }], function (err, result) {
     
