@@ -34,7 +34,7 @@ function displayItems(){
   })
 }
 
-function addItem() {
+function addItem(){
     inquirer.prompt([{
         type: 'input',
         name: 'ProductName',
@@ -60,8 +60,44 @@ function addItem() {
     })
 }
 
+function updateQuantity(){
+    inquirer.prompt([{
+        type: 'input',
+        name: 'itemId',
+        message: 'Enter Product Id of item you would like to add to?'
+    }, {
+        type: 'input',
+        name: 'newQuantity',
+        message: 'How many of item to add?'
+    }]).then(function(result) {
+        connection.query('UPDATE products SET StockQuantity=StockQuantity+' + result.newQuantity + ' WHERE ItemId="' + result.itemId + '"', function(err, res) {
+            if (err) throw err;
+            if (res.affectedRows == 0) {
+                console.log("ProductId does not exist! Please try again.");
+                displayItems();
+            } else {
+                console.log("Quantity updated in inventory!");
+                displayItems();
+            }
+        })
+    })
+}
 
-function promptUser(res) {
+function lowInventory(table){
+  for(i=0;i<table.length;i++){
+    if(table[i].StockQuantity<5){
+      
+      console.log("---------Low Inventory---------");
+      console.log('Product: ', table[i].ProductName);
+      console.log('Quantity: ', table[i].StockQuantity);
+      console.log('');
+    }
+  }
+  displayItems();
+
+} 
+
+function promptUser(res){
   inquirer.prompt([{
       type: 'list',
       name: 'choice',
@@ -79,7 +115,7 @@ function promptUser(res) {
             updateQuantity();
             break;
         case 'View Low Inventory':
-            updateQuantity();
+            lowInventory(res);
             break;
         default:
             process.exit();
