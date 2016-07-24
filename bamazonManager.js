@@ -34,6 +34,33 @@ function displayItems(){
   })
 }
 
+function addItem() {
+    inquirer.prompt([{
+        type: 'input',
+        name: 'ProductName',
+        message: 'Product Name?'
+    }, {
+        type: 'input',
+        name: 'DepartmentName',
+        message: 'Product Department?'
+    }, {
+        type: 'input',
+        name: 'Price',
+        message: 'Product Price?'
+    }, {
+        type: 'input',
+        name: 'StockQuantity',
+        message: 'Quantity?'
+    }]).then(function(result) {
+        connection.query('INSERT INTO products (`ProductName`, `DepartmentName`, `Price`, `StockQuantity`) VALUES ("' + result.ProductName + '","' + result.DepartmentName + '",' + result.Price + ',' + result.StockQuantity + ");", function(err, res) {
+            if (err) throw err;
+            console.log("Item Added!");
+            displayItems();
+        })
+    })
+}
+
+
 function promptUser(res) {
   inquirer.prompt([{
       type: 'list',
