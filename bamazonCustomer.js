@@ -1,6 +1,9 @@
 var prompt = require('prompt');
 var mysql = require('mysql');
 var table = require('easy-table');
+var productId = '';
+var productQuantity = '';
+
 
 var connection = mysql.createConnection({
   host: 'localhost',
@@ -9,48 +12,18 @@ var connection = mysql.createConnection({
   password: '',
   database: 'bamazon'
 })
+
 connection.connect(function(err){
   if(err) throw err;
   console.log('connected as id ' + connection.threadId);
 })
 
-function checkQuantity(product, quantity){
-  connection.query('SELECT ')
-}
 
-function promptUser(){
-  prompt.start();
 
-  prompt.get([{
-      name: 'productId',
-      description: 'Enter the Product Id you would like to purchase: ',
-      pattern: /^[1-9,10]$/,
-      message: 'Select a Product Id 1-10',
-      required: true
-    }, {
-      name: 'quantity',
-      description: 'Enter the quantity: ',
-      pattern: /^[1-100]$/,
-      message: 'Select a Product Id 1-100',
-      required: true
-    }], function (err, result) {
-    
-    console.log('Command-line input received:');
-    console.log('  Product Id: ' + result.productId);
-    console.log('  Quantity: ' + result.quantity);
-
-    checkQuantity(result.productId, result.quantity);
-  });
-}
 
 function displayItems(){
   connection.query('SELECT * FROM products', function(err, res){
-    // if(err) throw err;
-    // console.log('Item ID        Product        Department      Price   Quantity');
-    // for (i=0;i<res.length;i++){
-      
-    //   console.log(JSON.stringify(res[i].ItemId + '  ' + res[i].ProductName + '  ' + res[i].DepartmentName + '  ' + res[i].Price + '  ' + res[i].StockQuantity));
-    // }
+    
     var t = new table;
  
     res.forEach(function(product) {
@@ -61,11 +34,73 @@ function displayItems(){
       t.cell('Quantity', product.StockQuantity)
       t.newRow()
     })
-
     console.log(t.toString());
-    promptUser();
+    promptUser(res);
   })
+  
+}
+
+function promptUser(table){
+  
+  prompt.start();
+
+  prompt.get([{
+      name: 'productId',
+      description: 'Enter the Product Id you would like to purchase(1-10): ',
+      message: 'Product Id must be 1-10',
+      required: true,
+      conform: function(value) {
+        value = parseInt(value);
+        return value > 0 && value <= 10;
+      }
+    }, {
+      name: 'quantity',
+      description: 'Enter the quantity(1-100): ',
+      message: 'Quantity must be 1-100',
+      required: true,
+      conform: function(value2) {
+        value2 = parseInt(value2);
+        return value2 > 0 && value2 <= 100;
+      }
+    }], function (err, result) {
+    
+    productId = result.productId;
+    productQuantity = result.quantity;
+
+    console.log('Command-line input received:');
+    console.log('  Product Id: ' + productId);
+    console.log('  Quantity: ' + productQuantity);
+
+    for(i=0;i<table.length;i++){
+      if(table[i].ItemId == productId){
+        if((table[i].StockQuantity-productQuantity)>0){
+          connection.query("UPDATE products SET StockQuantity='" + (table[i].StockQuantity-productQuantity) + "' WHERE ItemId='" + productId + "'", function(err, res){
+            if(err) throw err;
+            console.log("Item(s) Purchased!!");
+            prompt.start();
+            prompt.get([{
+              name: 'input',
+              description: 'Would you like to buy more items(y,n): ',
+              message: 'Please enter y or n',
+              required: true,
+            }], function(err, result){
+              if(result.input === 'y' || result.input === 'Y'){
+                displayItems();
+              } else {
+                process.exit();
+              }
+            })
+          });
+        } else {
+          console.log("Sorry we do not have enough item in stock!");
+          displayItems();
+        }
+      }
+    }
+  });
 }
 
 displayItems();
-connection.end();
+
+
+
